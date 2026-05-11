@@ -32,7 +32,7 @@ def run_flask():
 intents = discord.Intents.default()
 intents.members = True
 intents.guilds = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+intents.message_content = True
 
 
 def trouver_membre_du_salon(guild, salon):
