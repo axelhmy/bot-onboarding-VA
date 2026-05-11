@@ -79,8 +79,13 @@ async def executer_relance():
             return 0, 0
 
         print(f"✅ Serveur trouvé : {guild.name}", flush=True)
-        await guild.chunk()
-        print(f"📊 Membres chargés : {len(guild.members)}", flush=True)
+
+        try:
+            await guild.chunk()
+            print(f"📊 Membres chargés : {len(guild.members)}", flush=True)
+        except Exception as e:
+            print(f"⚠️ Erreur lors du chunk : {e}", flush=True)
+            print(f"📊 Membres visibles sans chunk : {len(guild.members)}", flush=True)
 
         categorie = guild.get_channel(CATEGORIE_VA_ID)
         if categorie is None:
@@ -141,17 +146,38 @@ async def avant_relance():
 
 @bot.event
 async def on_ready():
-    print(f"✅ Bot connecté : {bot.user}", flush=True)
-    guild = bot.get_guild(GUILD_ID)
-    if guild:
-        await guild.chunk()
-        print(f"📊 Serveur : {guild.name} ({len(guild.members)} membres)", flush=True)
-    else:
-        print(f"❌ Serveur {GUILD_ID} introuvable au démarrage", flush=True)
+    try:
+        print(f"✅ Bot connecté : {bot.user}", flush=True)
+        print(f"🔍 Recherche du serveur ID {GUILD_ID}...", flush=True)
+        
+        guild = bot.get_guild(GUILD_ID)
+        if guild is None:
+            print(f"❌ Serveur {GUILD_ID} INTROUVABLE", flush=True)
+            print(f"📋 Serveurs disponibles : {[(g.id, g.name) for g in bot.guilds]}", flush=True)
+            return
+        
+        print(f"✅ Serveur trouvé : {guild.name}", flush=True)
+        print(f"🔄 Chargement des membres...", flush=True)
+        
+        try:
+            await guild.chunk()
+            print(f"📊 Membres chargés : {len(guild.members)}", flush=True)
+        except Exception as e:
+            print(f"⚠️ Erreur lors du chunk : {e}", flush=True)
+            print(f"📊 Membres visibles sans chunk : {len(guild.members)}", flush=True)
 
-    if not relance_quotidienne.is_running():
-        relance_quotidienne.start()
-        print(f"⏰ Tâche planifiée tous les jours à 19h00 (Europe/Paris)", flush=True)
+        print(f"⏰ Démarrage de la tâche planifiée...", flush=True)
+        if not relance_quotidienne.is_running():
+            relance_quotidienne.start()
+            print(f"⏰ Tâche planifiée tous les jours à 19h00 (Europe/Paris)", flush=True)
+        else:
+            print(f"⏰ Tâche déjà en cours", flush=True)
+        
+        print(f"🎉 === BOT PRÊT ===", flush=True)
+        
+    except Exception as e:
+        print(f"❌ ERREUR FATALE dans on_ready : {e}", flush=True)
+        traceback.print_exc()
 
 
 @bot.command(name="test_relance")
