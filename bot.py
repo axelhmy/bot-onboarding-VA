@@ -33,6 +33,7 @@ intents = discord.Intents.default()
 intents.members = True
 intents.guilds = True
 intents.message_content = True
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
 def trouver_membre_du_salon(guild, salon):
@@ -78,7 +79,6 @@ async def relance_quotidienne():
         print("❌ Serveur introuvable")
         return
 
-    # On s'assure d'avoir la liste complète des membres
     await guild.chunk()
 
     categorie = guild.get_channel(CATEGORIE_VA_ID)
@@ -128,7 +128,6 @@ async def on_ready():
         print(f"⏰ Tâche planifiée tous les jours à 19h00 (Europe/Paris)")
 
 
-# Commande de test (admin uniquement)
 @bot.command(name="test_relance")
 @commands.has_permissions(administrator=True)
 async def test_relance(ctx):
